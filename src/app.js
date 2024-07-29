@@ -6,6 +6,7 @@ import { PORT, SESSION_SECRET } from "./config.js";
 import connectDB from "./database.js";
 import "./passportConfig.js";
 import authRoutes from "./routes/auth.js";
+import webhookRoutes from "./routes/webhook.js"
 import cors from "cors"
 
 
