@@ -1,19 +1,19 @@
-// src/app.js
 import express from "express";
+import mongoose from "mongoose";
 import session from "express-session";
 import passport from "passport";
-import { PORT, SESSION_SECRET } from "./config.js";
-import connectDB from "./database.js";
+import MongoStore from "connect-mongo";
+import { PORT, MONGO_URI, SESSION_SECRET, CLIENT_URL } from "./config.js";
 import "./passportConfig.js";
 import authRoutes from "./routes/auth.js";
-import webhookRoutes from "./routes/webhook.js"
-import cors from "cors"
-
+import webhookRoutes from "./routes/webhook.js";
 
 const app = express();
 
-// Connect to MongoDB
-connectDB();
+mongoose
+  .connect(MONGO_URI)
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.log(err));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -23,21 +23,14 @@ app.use(
     secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
-  })
-);
-
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    methods: "GET,POST,PUT,DELETE",
-    credentials: true,
+    store: MongoStore.create({ mongoUrl: MONGO_URI }),
+    cookie: { secure: false }, // Set to true if using HTTPS
   })
 );
 
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Define routes
 app.use("/auth", authRoutes);
 app.use("/webhook", webhookRoutes);
 
